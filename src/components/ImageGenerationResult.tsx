@@ -90,18 +90,17 @@ export function ImageGenerationResult({
 
         {loading && <Skeleton className="w-full h-full" />}
 
-        {!loading && image && (
-          <div className="absolute bottom-2 left-0 w-full flex justify-center">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleDownload}
-              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs py-1 px-2"
-            >
-              Download
-            </Button>
-          </div>
-        )}
+        {/* <div className="absolute bottom-2 left-0 w-full flex justify-center">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleDownload}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs py-1 px-2"
+            disabled={loading || !image}
+          >
+            Download
+          </Button>
+        </div> */}
       </div>
 
       {isModalOpen && (
