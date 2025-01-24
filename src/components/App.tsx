@@ -53,16 +53,16 @@ export function App() {
 					<div className="flex flex-col gap-2">
 						<textarea
 							id="input"
-							className="w-full p-2 rounded-xl text-base sm:text-sm z-10 resize-none border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="w-full p-2 rounded-xl text-base sm:text-sm z-10 resize-none border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
 							value={prompt}
 							onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt(e.target.value)}
-							placeholder="Describe the image you want to generate ..."
+							placeholder="Describe the image you want to generate..."
 							rows={3}
 						/>
 						<Button
 							variant="expandIcon"
 							className={cn(
-								"rounded-xl transition-all w-full",
+								"rounded-xl transition-all w-full bg-pink-500 hover:bg-pink-600 text-white",
 								isGenerating && "opacity-50 cursor-not-allowed"
 							)}
 							Icon={WandSparklesIcon}
