@@ -31,7 +31,7 @@ export function Onboarding() {
 					alt="Relighting Demo"
 				/>
 				<div className="px-6 gap-2 w-full md:w-fit flex flex-col h-full justify-center">
-					<CardTitle className="text-balance">Integrate ComfyUI into your project</CardTitle>
+					<CardTitle className="text-balance">Integrate Pixio API into your project</CardTitle>
 					<CardDescription className="text-balance">
 						A demo app build with Next js 15, Tailwind, Shadcn UI, Drizzle,
 						Turso, Clerk
