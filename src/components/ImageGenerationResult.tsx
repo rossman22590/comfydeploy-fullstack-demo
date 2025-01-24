@@ -1,103 +1,124 @@
 "use client";
 
-import { LoadingIcon } from "@/components/LoadingIcon";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useComfyQuery } from "@/hooks/hooks";
-import { cn } from "@/lib/utils";
-import { checkStatus } from "@/server/generate";
 import { useEffect, useState } from "react";
+import { LoadingIcon } from "@/components/LoadingIcon";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { checkStatus } from "@/server/generate";
+import { cn } from "@/lib/utils";
+
+interface ImageGenerationResultProps extends React.ComponentProps<"div"> {
+  runId: string;
+}
 
 export function ImageGenerationResult({
-	runId,
-	className,
-}: { runId: string } & React.ComponentProps<"div">) {
-	const [image, setImage] = useState("");
-	const [status, setStatus] = useState<string>("preparing");
-	const [progress, setProgress] = useState<number | undefined>();
-	const [liveStatus, setLiveStatus] = useState<string | null>();
-	const [loading, setLoading] = useState(true);
+  runId,
+  className,
+}: ImageGenerationResultProps) {
+  const [image, setImage] = useState("");
+  const [status, setStatus] = useState<string>("preparing");
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-	const { data, isLoading } = useComfyQuery(
-		"run",
-		"get",
-		[
-			{
-				runId: runId,
-			},
-		],
-		{
-			refetchInterval: 2000,
-		},
-	);
+  useEffect(() => {
+    if (!runId) return;
+    const interval = setInterval(() => {
+      checkStatus(runId).then((res) => {
+        if (res) {
+          setStatus(res.status);
+          if (res.status === "success" && res.outputs && res.outputs.length > 0) {
+            const imageData = res.outputs[0]?.data?.images?.[0];
+            if (imageData && typeof imageData === 'object' && 'url' in imageData) {
+              setImage(imageData.url);
+              setLoading(false);
+              clearInterval(interval);
+            }
+          }
+        }
+      });
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [runId]);
 
-	useEffect(() => {
-		const res = data;
-		if (res) {
-			setStatus(res.status);
-			setProgress(res.progress);
-			setLiveStatus(res.liveStatus ?? null);
-		}
-		if (res && res.status === "success") {
-			// console.log(res.outputs?.[0]?.data);
-			const image = res.outputs?.[0]?.data?.images?.[0];
-			if (image && !(typeof image === "string")) {
-				setImage(image.url);
-			}
-			setLoading(false);
-		}
-	}, [data]);
+  const handleDownload = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (!image) return;
 
-	// Polling in frontend to check for the
-	// useEffect(() => {
-	// 	if (!runId) return;
-	// 	const interval = setInterval(() => {
-	// 		checkStatus(runId).then((res) => {
-	// 			if (res) {
-	// 				setStatus(res.status);
-	// 				setProgress(res.progress);
-	// 				setLiveStatus(res.liveStatus ?? null);
-	// 			}
-	// 			if (res && res.status === "success") {
-	// 				console.log(res.outputs?.[0]?.data);
-	// 				setImage(res.outputs?.[0]?.data?.images?.[0].url ?? "");
-	// 				setLoading(false);
-	// 				clearInterval(interval);
-	// 			}
-	// 		});
-	// 	}, 2000);
-	// 	return () => clearInterval(interval);
-	// }, [runId]);
+    try {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const blobURL = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobURL;
+      link.download = "generated-image.png";
+      link.click();
+      URL.revokeObjectURL(blobURL);
+    } catch (err) {
+      console.error("Download error: ", err);
+    }
+  };
 
-	return (
-		<div
-			className={cn(
-				"border border-gray-200 w-full aspect-[512/512] relative",
-				className,
-			)}
-		>
-			{!loading && image && (
-				<img
-					className="w-full h-full"
-					src={image}
-					alt="Generated output"
-				/>
-			)}
-			{!image && status && (
-				<div className="absolute z-10 top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-2 px-4">
-					<div className="flex items-center justify-center gap-2 text-gray-600">
-						{status} <LoadingIcon />
-					</div>
-					{progress !== undefined && (
-						<Progress value={progress * 100} className="h-[2px] w-full" />
-					)}
-					<span className="text-sm text-center text-gray-400">
-						{" "}
-						{liveStatus !== undefined && liveStatus}
-					</span>
-				</div>
-			)}
-			{loading && <Skeleton className="w-full h-full" />}
-		</div>
-	);
+  return (
+    <>
+      <div
+        className={cn(
+          "aspect-square relative overflow-hidden rounded-lg shadow-md cursor-pointer",
+          className,
+          loading
+            ? "bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 animate-pulse"
+            : "bg-gray-800"
+        )}
+        onClick={() => {
+          if (!loading && image) {
+            setIsModalOpen(true);
+          }
+        }}
+      >
+        {!loading && image && (
+          <img
+            className="w-full h-full object-cover"
+            src={image}
+            alt="Generated image"
+          />
+        )}
+
+        {!image && status && (
+          <div className="absolute inset-0 flex items-center justify-center text-white">
+            {status} <LoadingIcon />
+          </div>
+        )}
+
+        {loading && <Skeleton className="w-full h-full" />}
+
+        {!loading && image && (
+          <div className="absolute bottom-2 left-0 w-full flex justify-center">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleDownload}
+              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs py-1 px-2"
+            >
+              Download
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <button
+            className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/80 rounded px-3 py-1"
+            onClick={() => setIsModalOpen(false)}
+          >
+            X
+          </button>
+          <img
+            src={image}
+            alt="Expanded generated image"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      )}
+    </>
+  );
 }
