@@ -46,10 +46,10 @@ export function UserRuns() {
     if (userRuns && userRuns.length > 0) {
         return (
             <>
-                <div className="max-w-[1200px] w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pb-32">
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pb-32 px-4 sm:px-6 md:px-8">
                     {userRuns.map((run) => (
                         <div
-                            className="rounded-sm overflow-hidden relative group"
+                            className="aspect-square rounded-sm overflow-hidden relative group"
                             key={run.run_id}
                         >
                             {!run.image_url && <ImageGenerationResult runId={run.run_id} />}
@@ -57,10 +57,18 @@ export function UserRuns() {
                                 <>
                                     <img src={run.image_url} alt="Run" className="w-full h-full object-cover" />
                                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-black bg-opacity-50 flex justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button size="sm" onClick={() => run.image_url && handleView(run.image_url)}>
+                                        <Button 
+                                            size="sm" 
+                                            onClick={() => run.image_url && handleView(run.image_url)}
+                                            className="bg-pink-500 hover:bg-pink-600 text-white"
+                                        >
                                             <Eye className="mr-2 h-4 w-4" /> View
                                         </Button>
-                                        <Button size="sm" onClick={() => run.image_url && handleDownload(run.image_url)}>
+                                        <Button 
+                                            size="sm" 
+                                            onClick={() => run.image_url && handleDownload(run.image_url)}
+                                            className="bg-pink-500 hover:bg-pink-600 text-white"
+                                        >
                                             <Download className="mr-2 h-4 w-4" /> Download
                                         </Button>
                                     </div>
