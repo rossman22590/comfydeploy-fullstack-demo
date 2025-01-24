@@ -49,7 +49,7 @@ export function Onboarding() {
 								Get Started
 							</Button>
 						</SignInButton>
-						<Button variant="outline" className="rounded-xl" asChild>
+						{/* <Button variant="outline" className="rounded-xl" asChild>
 							<Link
 								target="_blank"
 								href="https://github.com/comfy-deploy/comfydeploy-fullstack-demo"
@@ -58,7 +58,7 @@ export function Onboarding() {
 								GitHub
 								<ExternalLink size={16} />
 							</Link>
-						</Button>
+						</Button> */}
 					</div>
 				</div>
 			</div>
